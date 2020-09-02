@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json" // Handling with JSON data
-	"fmt"
+	_ "fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"reflect"
@@ -79,18 +79,54 @@ func newEntry(res http.ResponseWriter, req *http.Request) {
 
 func updateEntry(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(req)
 
-	var song Guitar
+	type songdetails struct {
+		Songname string
+		Tab      string
+		Tutorial string
+		Url      string
+		Singer   string
+	}
+
+	var song songdetails
+
+	queryOne := "UPDATE songdetails SET "
+	queryTwo := "UPDATE song SET "
 
 	json.NewDecoder(req.Body).Decode(&song)
+
 	value := reflect.ValueOf(song)
-	query := "UPDATE songdetails SET "
 	for i := 0; i < value.NumField(); i++ {
-		// fmt.Println(" ", query, value.Type().Field(i).Name, value.Field(i).Interface())
-		// fmt.Println(query + value.Field(i).Interface())
+		val := value.Field(i).Interface().(string)
+
+		if value.Type().Field(i).Name == "Songname" && len(val) != 0 {
+			queryOne += value.Type().Field(i).Name + "= '" + val + "'"
+			queryTwo += value.Type().Field(i).Name + "= '" + val + "'"
+		}
+
+		if (value.Type().Field(i).Name == "Tutorial" || value.Type().Field(i).Name == "Tab") && len(val) != 0 {
+			queryOne += ", " + value.Type().Field(i).Name + "= '" + val + "'"
+		}
+
+		if (value.Type().Field(i).Name == "Url" || value.Type().Field(i).Name == "Singer") && len(val) != 0 {
+			queryTwo += ", " + value.Type().Field(i).Name + "= '" + val + "'"
+		}
+
 	}
-	// _,err:=db.Exec("UPDATE songdetails SET tutorial=?")
-	// json.NewEncoder(res).Encode(updateEntry)
+	queryOne += " WHERE songname= '" + params["song"] + "';"
+	queryTwo += " WHERE songname= '" + params["song"] + "';"
+
+	_, err := db.Exec(queryOne)
+	if err != nil {
+		json.NewEncoder(res).Encode("Error")
+	}
+	_, err = db.Exec(queryTwo)
+	if err != nil {
+		json.NewEncoder(res).Encode("Error")
+	}
+
+	json.NewEncoder(res).Encode(song)
 }
 
 func deleteEntry(res http.ResponseWriter, req *http.Request) {
