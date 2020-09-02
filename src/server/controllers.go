@@ -2,15 +2,10 @@ package main
 
 import (
 	"encoding/json" // Handling with JSON data
-	_ "fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"reflect"
 )
-
-// Storing mock data
-
-var data []Guitar
 
 // Route handler
 // Implementation of CRUD operations
@@ -49,7 +44,7 @@ func getSong(res http.ResponseWriter, req *http.Request) {
 	query := mux.Vars(req)
 	singer := query["song"]
 	result := db.QueryRow("SELECT * from song INNER JOIN songdetails USING(songname) WHERE song.songname=songdetails.songname and song.songname=?;", singer)
-	err = result.Scan(&songdetails.Name, &songdetails.Tutorial, &songdetails.Tab, &song.Singer, &song.URL)
+	err = result.Scan(&songdetails.Name, &song.Singer, &song.URL, &songdetails.Tutorial, &songdetails.Tab)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -131,13 +126,20 @@ func updateEntry(res http.ResponseWriter, req *http.Request) {
 
 func deleteEntry(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json")
-	query := mux.Vars(req)
-	for index, item := range data {
-		if item.Singer == query["song"] {
-			data = append(data[:index], data[index+1:]...)
-			break
-		}
+	params := mux.Vars(req)
+	// query := "DELETE songdetails, song FROM songdetails INNER JOIN song ON songdetails.songname=song.songname where songdetails.songname='" + params["song"] + "';"
+	_, err = db.Exec("DELETE FROM song where songname=?;", params["song"])
+
+	if err != nil {
+		panic(err.Error())
 	}
-	json.NewEncoder(res).Encode(data)
+
+	_, err := db.Exec("DELETE FROM songdetails where songname=?;", params["song"])
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	json.NewEncoder(res).Encode("Deleted")
 
 }

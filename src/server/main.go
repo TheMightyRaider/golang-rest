@@ -3,10 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux" // handler for http request aka router
-	"log"                    // For logging errors
-	"net/http"               // communicating with the server
+	_ "github.com/go-sql-driver/mysql" // For communicating with the database
+	"github.com/gorilla/mux"           // handler for http request aka router
+	"log"                              // For logging errors
+	"net/http"                         // communicating with the server
 )
 
 var db, err = sql.Open("mysql", "mighty:Madhurima.k7@tcp(127.0.0.1:3306)/")
