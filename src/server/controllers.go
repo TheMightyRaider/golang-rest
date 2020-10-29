@@ -12,7 +12,7 @@ import (
 
 func index(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-type", "application/json")
-	json.NewEncoder(res).Encode("Server is running ")
+	json.NewEncoder(res).Encode("Server is running")
 }
 
 func getAllSong(res http.ResponseWriter, req *http.Request) {
