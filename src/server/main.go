@@ -9,7 +9,7 @@ import (
 	"net/http"                         // communicating with the server
 )
 
-var db, err = sql.Open("mysql", "mighty:Madhurima.k7@tcp(127.0.0.1:3306)/")
+var db, err = sql.Open("mysql", "mighty:passwordneeded@tcp(127.0.0.1:3306)/")
 
 func main() {
 	//Init Router
